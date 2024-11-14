@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -37,6 +38,11 @@ public class AuthenticationController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
         }
         return  ResponseEntity.ok(authenticationService.Login(account));
+    }
+
+    @PostMapping("/token")
+    public ResponseEntity<Object> refreshToken(@RequestHeader("Authorization") String token)  {
+        return  ResponseEntity.ok(authenticationService.refresh(token));
     }
 
 }

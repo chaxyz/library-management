@@ -1,10 +1,14 @@
 package com.example.librarymanagement.config;
 
 
+import com.example.librarymanagement.exception.CustomAuthenticationEntryPoint;
 import com.example.librarymanagement.service.UserService;
+import com.example.librarymanagement.service.jwt.JwtAuthFilter;
+import org.apache.tomcat.Jar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -14,6 +18,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -23,12 +28,23 @@ public class WebSecurity {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtAuthFilter jwtAuthFilter;
+
+    @Autowired
+    private CustomAuthenticationEntryPoint authenticationEntryPoint;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeRequests(
-                        authorize -> authorize.requestMatchers("/login","signup", "/error").permitAll()
-                                .requestMatchers("/token").permitAll()
+                        authorize -> authorize.requestMatchers("/login","signup","/token", "/error").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/books/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
+                                .anyRequest().authenticated()
+                ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(authenticationEntryPoint)
                 ).httpBasic(withDefaults());
         return httpSecurity.build();
     }

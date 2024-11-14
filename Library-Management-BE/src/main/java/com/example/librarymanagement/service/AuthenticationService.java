@@ -5,10 +5,12 @@ import com.example.librarymanagement.dto.authentication.JwtResponse;
 import com.example.librarymanagement.dto.authentication.Login;
 import com.example.librarymanagement.dto.authentication.SignUp;
 import com.example.librarymanagement.entity.User;
+import com.example.librarymanagement.utils.JwtTokenUtil;
 import io.viascom.nanoid.NanoId;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -42,5 +44,23 @@ public class AuthenticationService {
         String token = jwtTokenUtil.generateToken(user);
         String refreshToken = jwtTokenUtil.generateRefreshToken(user);
         return  new JwtResponse(token,refreshToken);
+    }
+
+    public JwtResponse refresh(String token) {
+        try {
+            String onlyToken = null;
+            if (token.startsWith("Bearer ")) {
+                onlyToken = token.substring(7);
+            }
+            if (!jwtTokenUtil.validateRefreshToken(onlyToken) || onlyToken == null) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh-token");
+            }
+            String oid = jwtTokenUtil.getOidFromToken(onlyToken);
+            User user = userService.loadUserByOid(oid);
+            String newToken = jwtTokenUtil.generateToken(user);
+            return new JwtResponse(newToken);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh-token");
+        }
     }
 }

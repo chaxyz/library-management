@@ -1,5 +1,6 @@
 package com.example.librarymanagement;
 
+import com.example.librarymanagement.utils.ListMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,11 +13,20 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class ApplicationConfig {
     @Bean
     public ModelMapper modelMapper() {
-        return new ModelMapper();
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration()
+                .setSkipNullEnabled(true)  // Skip null properties
+                .setFieldMatchingEnabled(true);
+        return modelMapper;
     }
 
     @Value("${cors.allowed.origins}")
     private String allowedOrigins;
+
+    @Bean
+    public ListMapper listMapper() {
+        return ListMapper.getInstance();
+    }
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
