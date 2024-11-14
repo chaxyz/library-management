@@ -21,7 +21,8 @@ public class AuthenticationService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private ModelMapper modelMapper;
-
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
     public UserDto signUp(SignUp register) {
         if (!userService.validateSignUpUser(register.getUsername())) {
             User user = new User();
@@ -37,7 +38,9 @@ public class AuthenticationService {
     }
 
     public JwtResponse Login(Login account) {
-        userService.getByUsername(account.getUsername()).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Username not found"));
-        return  null;
+        User user = userService.getByUsername(account.getUsername()).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Username not found"));
+        String token = jwtTokenUtil.generateToken(user);
+        String refreshToken = jwtTokenUtil.generateRefreshToken(user);
+        return  new JwtResponse(token,refreshToken);
     }
 }

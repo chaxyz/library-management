@@ -26,19 +26,17 @@ public class AuthenticationController {
     AuthenticationManager authenticationManager;
     @PostMapping("/signup")
     public ResponseEntity<UserDto> signUp(@RequestBody @Valid SignUp signup){
-        System.out.println("test5646");
         return  ResponseEntity.ok(authenticationService.signUp(signup));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@Valid @RequestBody Login login){;
+    public ResponseEntity<JwtResponse> login(@Valid @RequestBody Login account){;
         Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword()));
+                .authenticate(new UsernamePasswordAuthenticationToken(account.getUsername(), account.getPassword()));
         if (!authentication.isAuthenticated()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
         }
-        System.out.println("sucess");
-        return  null;
+        return  ResponseEntity.ok(authenticationService.Login(account));
     }
 
 }
