@@ -1,5 +1,28 @@
+<script setup>
+import { ref, computed } from 'vue'
+import { useToastStore } from '@/stores/toastStore'
+import ToastPopup from './ToastPopup.vue'
+
+const username = ref('')
+const password = ref('')
+const toastStore = useToastStore()
+const isButtonDisabled = computed(() => username.value.length < 8 || password.value.length < 8)
+
+const handleLogin = () => {
+  const isLoginSuccessful =
+    username.value === 'user@example.com' && password.value === 'password123'
+  if (!isLoginSuccessful) {
+    toastStore.addToast({ message: 'Login failed. Check your credentials.', type: 'error' })
+  } else {
+    toastStore.addToast({ message: 'Login successful!', type: 'success' })
+  }
+}
+</script>
+
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <ToastPopup />
+
     <div class="w-full max-w-md p-8 space-y-4 bg-white rounded-lg shadow-md">
       <h2 class="text-2xl font-bold text-center text-gray-800">Login</h2>
 
@@ -41,26 +64,6 @@
           Log In
         </button>
       </form>
+    </div>
   </div>
-</div>
-
 </template>
-
-<script setup>
-import { ref, computed } from 'vue'
-import {useToast} from 'vue-toast-notification';
-import 'vue-toast-notification/dist/theme-sugar.css';
-const $toast = useToast();
-
-const username = ref('')
-const password = ref('')
-
-const isButtonDisabled = computed(() => username.value.length < 8 || password.value.length < 8)
-
-const handleLogin = () => {
-    const isLoginSuccessful = username.value === 'user@example.com' && password.value === 'password123';
-   if(!isLoginSuccessful){
-    let instance = $toast.error('Incorrect credentails' , {duration : 3000});
-   }
-}
-</script>
