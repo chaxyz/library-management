@@ -28,7 +28,4 @@ public class Book {
     @Column(nullable = false)
     private Rent.Status status;
 
-    public enum Status {
-        BORROWED, RETURNED
-    }
 }

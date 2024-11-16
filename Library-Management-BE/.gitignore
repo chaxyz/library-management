@@ -11,7 +11,7 @@
 .sts4-cache
 
 src/main/resources/application.properties
-
+target/
 
 # Created by https://www.gitignore.io/api/git,java,maven,eclipse,windows
 

@@ -43,6 +43,6 @@ public class Rent {
     }
 
     public enum Status {
-        BORROWED, RETURNED
+        returned,borrowed;
     }
 }
