@@ -12,6 +12,10 @@
 
 src/main/resources/application.properties
 target/
+.idea/*
+!.idea/modules.xml
+!.idea/vcs.xml
+!.idea/runConfigurations/
 
 # Created by https://www.gitignore.io/api/git,java,maven,eclipse,windows
 
