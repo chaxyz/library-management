@@ -1,7 +1,7 @@
 <script setup>
-import Login from './components/LoginPage.vue'
+import { RouterView } from 'vue-router'
 </script>
 
 <template>
-  <Login />
+  <router-view></router-view>
 </template>
