@@ -40,7 +40,7 @@ public class BookController {
     @Autowired
     private StorageService storageService;
 
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<Book> createBook(
             @RequestPart("bookDetails") BookDto bookDto,
             @RequestParam(value = "file", required = false) MultipartFile file
@@ -74,7 +74,7 @@ public class BookController {
     }
 
 
-    @GetMapping
+    @GetMapping("")
     public List<Book> getAllBooks() {
         return bookService.getAll();
     }

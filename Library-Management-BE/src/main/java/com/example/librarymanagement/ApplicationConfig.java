@@ -38,7 +38,9 @@ public class ApplicationConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(allowedOrigins)
                         .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE", "HEAD")
-                        .allowedHeaders("*");
+                        .allowedHeaders("Authorization", "Content-Type", "X-Requested-With", "Accept")
+                        .exposedHeaders("Authorization")
+                        .allowCredentials(true);
             }
         };
     }
