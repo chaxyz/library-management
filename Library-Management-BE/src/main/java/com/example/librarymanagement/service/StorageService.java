@@ -56,7 +56,6 @@ public class StorageService {
     }
 
     public String deleteFile(String fileName) {
-        System.out.println(fileName);
         s3Client.deleteObject(bucketName, fileName);
         return fileName + " removed ...";
     }
@@ -72,8 +71,6 @@ public class StorageService {
     }
     public void deleteFileFromUrl(String fileUrl) {
         String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
-        System.out.println("fileUrl: " + fileUrl);
-        System.out.println("fileName: " + fileName);
         s3Client.deleteObject(bucketName, fileName);
     }
 }

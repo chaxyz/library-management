@@ -105,11 +105,18 @@ public class BookController {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format");
                 }
                 if (existingBook.getPath() != null) {
+
                     String oldFileName = extractFileNameFromUrl(existingBook.getPath());
                     storageService.deleteFileFromUrl(oldFileName);
                 }
                 String newFileUrl = storageService.uploadFile(file);
                 existingBook.setPath(newFileUrl);
+            }else {
+                if (existingBook.getPath() != null) {
+                    String oldFileName = extractFileNameFromUrl(existingBook.getPath());
+                    storageService.deleteFileFromUrl(oldFileName);
+                }
+                existingBook.setPath(null);
             }
             Book updatedBook = bookRepository.save(existingBook);
             return ResponseEntity.ok(updatedBook);
