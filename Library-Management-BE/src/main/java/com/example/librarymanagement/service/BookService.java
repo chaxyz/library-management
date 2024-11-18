@@ -40,6 +40,10 @@ public class BookService implements CrudService<Book, Integer> {
 
     }
 
+    public List<Book> getAllByCatagory(int catagoryId) {
+        return bookRepository.findAllByCategory_Id(catagoryId);
+    }
+
     @Transactional
     @Override
     public void delete(Integer id) {

@@ -1,39 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from '@/components/LoginPage.vue'
 import Homepage from '@/components/Homepage.vue'
-import { parseJwt } from '@/utils/jwtUtil'
-const url = import.meta.env.VITE_BASE_URL
-
-async function refreshAccessToken() {
-  try {
-    const refreshToken = localStorage.getItem('refresh_token')
-    const res = await fetch(`${url}/token`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${refreshToken}`,
-        'content-type': 'application/json',
-      },
-    })
-
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`)
-    }
-
-    const data = await res.json()
-
-    localStorage.setItem('token', data.access_token)
-    return data
-  } catch (error) {
-    console.log(`Error during token refresh: ${error}`)
-    return null
-  }
-}
-
-function deleteTokenFromLocalStorage() {
-  localStorage.removeItem('token')
-  localStorage.removeItem('refresh_token')
-}
-
+import BookPopup from '@/components/BookPopup.vue'
+import ComfirmPopup from '@/components/ComfirmPopup.vue'
 const history = createWebHistory(import.meta.env.BASE_URL)
 
 const routes = [
@@ -50,6 +19,28 @@ const routes = [
     path: '/library',
     name: 'library',
     component: Homepage,
+    children: [
+      {
+        path: 'add',
+        name: 'addBook',
+        component: BookPopup,
+      },
+      {
+        path: ':id',
+        name: 'bookDetails',
+        component: BookPopup,
+      },
+      {
+        path: ':id/edit',
+        name: 'editBook',
+        component: BookPopup,
+      },
+      {
+        path: ':id/delete',
+        name: 'deleteBook',
+        component: ComfirmPopup,
+      },
+    ],
   },
 ]
 
@@ -58,35 +49,6 @@ const router = createRouter({
   routes,
   linkActiveClass: 'text-[#2ff6da]',
   linkExactActiveClass: 'hover:text-[#2ff6da] hover:text-[#2ff6da] p-2',
-})
-
-router.beforeEach(async (to, from, next) => {
-  const publicRoutes = ['/login']
-  const token = localStorage.getItem('token')
-  const parsedToken = token ? parseJwt(token) : null
-
-  const isTokenExpired = parsedToken && parsedToken.exp * 1000 < Date.now()
-
-  if (publicRoutes.includes(to.path)) {
-    return next()
-  }
-
-  if (token && !isTokenExpired) {
-    return next()
-  }
-
-  if (isTokenExpired) {
-    const refreshedToken = await refreshAccessToken()
-    if (refreshedToken) {
-      return next()
-    } else {
-      deleteTokenFromLocalStorage()
-      return next('/login')
-    }
-  }
-
-  deleteTokenFromLocalStorage()
-  next('/login')
 })
 
 export default router

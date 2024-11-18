@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-100">
     <header class="bg-indigo-600 text-white py-4 px-6 flex items-center justify-between">
       <div class="flex items-center space-x-6">
-        <div class="hover:underline cursor-pointer">Home</div>
+        <div class="hover:underline cursor-pointer" @click="handleHomeClick">Home</div>
 
         <div class="relative">
           <button
@@ -36,23 +36,17 @@
             class="absolute left-0 mt-2 z-10 bg-indigo-500 text-white divide-y divide-gray-100 rounded-lg shadow w-44"
           >
             <ul class="py-2 text-sm">
-              <li>
-                <a href="#" class="block px-4 py-2 hover:bg-indigo-600">Dashboard</a>
-              </li>
-              <li>
-                <a href="#" class="block px-4 py-2 hover:bg-indigo-600">Settings</a>
-              </li>
-              <li>
-                <a href="#" class="block px-4 py-2 hover:bg-indigo-600">Earnings</a>
-              </li>
-              <li>
-                <a href="#" class="block px-4 py-2 hover:bg-indigo-600">Sign out</a>
+              <li v-for="(category, index) in categoryManager.getCategories()" :key="index">
+                <div
+                  @click="handleSelectCategory(category.id)"
+                  class="block px-4 py-2 hover:bg-indigo-600"
+                >
+                  {{ category.name }}
+                </div>
               </li>
             </ul>
           </div>
         </div>
-
-        <div class="hover:underline cursor-pointer">Profile</div>
       </div>
 
       <div class="flex items-center space-x-4">
@@ -62,22 +56,80 @@
           placeholder="Search books..."
           class="px-4 py-2 rounded-md text-gray-800"
         />
-        <span>Welcome, {{ username }}</span>
+        <div>
+          <button @click="navigateToAddBook" class="bg-green-500 text-white px-4 py-2 rounded">
+            + Add Book
+          </button>
+        </div>
+        <span
+          >Welcome, {{ isLogined ? username[0].toUpperCase() + username.slice(1) : 'Guest' }}</span
+        >
+        <div
+          v-if="isLogined"
+          @click="handleSignOutClick"
+          class="border border-white rounded-md p-2 hover:bg-indigo-700 cursor-pointer"
+        >
+          Sign out
+        </div>
+        <div
+          v-if="!isLogined"
+          @click="handleLoginClick"
+          class="border border-white rounded-md p-2 hover:bg-indigo-700 cursor-pointer"
+        >
+          Login
+        </div>
       </div>
     </header>
-
-    <!-- Content Section -->
+    <router-view />
     <div class="p-6 flex flex-wrap gap-4 justify-start">
       <div
-        @click="handleClick"
         v-for="(book, index) in bookManager.getBooks()"
         :key="index"
-        class="bg-white shadow-md rounded-lg flex flex-col items-center p-4 w-40"
+        class="bg-white shadow-md rounded-lg flex flex-col items-center p-4 w-40 justify-between"
       >
-        <img :src="book.path" alt="Book Cover" class="h-32 w-full object-cover rounded-md" />
+        <img
+          :src="book.path ? book.path : '/src/assets/bookicon.png'"
+          alt="Book Cover"
+          class="h-32 w-full object-cover rounded-md"
+        />
         <div class="mt-4 text-center">
-          <p class="font-semibold text-gray-800">{{ book.title }}</p>
-          <p class="text-sm text-gray-600 mt-2">{{ book.description }}</p>
+          <div class="font-semibold text-gray-800">{{ book.name }}</div>
+        </div>
+        <div class="mt-4 text-center flex items-center justify-center gap-4">
+          <span
+            @click="router.push({ name: 'bookDetails', params: { id: book.id } })"
+            class="cursor-pointer text-blue-500 text-lg"
+            title="View Details"
+          >
+            📖
+          </span>
+          <span
+            @click="router.push({ name: 'editBook', params: { id: book.id } })"
+            class="cursor-pointer text-green-500 text-lg"
+            title="Edit Book"
+          >
+            ✏️
+          </span>
+          <span
+            @click="router.push({ name: 'deleteBook', params: { id: book.id } })"
+            class="cursor-pointer text-red-500 text-lg"
+            title="Delete Book"
+          >
+            ❌
+          </span>
+        </div>
+        <div
+          class="text-sm text-gray-600 mt-2"
+          :class="{
+            'text-green-700': book.status === 'returned',
+            'text-red-700': book.status !== 'returned',
+          }"
+        >
+          {{
+            book.status == 'returned'
+              ? 'Available'
+              : book.status[0].toUpperCase() + book.status.slice(1)
+          }}
         </div>
       </div>
     </div>
@@ -85,12 +137,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { parseJwt } from '@/utils/jwtUtil'
-import { fetchApi, fetchGet, fetchDelete, fetchPut, fetchPost } from '../utils/fetchUtil.js'
+import { fetchGet, fetchDelete, fetchPut, fetchPost } from '../utils/fetchUtil.js'
 import { useToastStore } from '@/stores/toastStore.js'
 import { useBookManager } from '@/stores/bookStore.js'
-
+import { useCategoryManager } from '@/stores/categoryStore.js'
+import { logout } from '@/stores/userManager.js'
+import { useRouter } from 'vue-router'
 // const books = ref([
 //   { title: 'Book One', description: 'An amazing book.', image: 'https://via.placeholder.com/150' },
 //   {
@@ -105,12 +159,23 @@ import { useBookManager } from '@/stores/bookStore.js'
 //   },
 // ])
 
+//store
+const toastStore = useToastStore()
+const bookManager = useBookManager()
+const categoryManager = useCategoryManager()
+//router
+const router = useRouter()
+//state
 const searchQuery = ref('')
 const username = ref('')
 const showDropdown = ref(false)
-const toastStore = useToastStore()
-const bookManager = useBookManager()
+//condition
 let hideTimeout
+
+let isLogined = computed(() => username.value && username.value.length > 0)
+function navigateToAddBook() {
+  router.push({ name: 'addBook' })
+}
 
 const hideDropdown = () => {
   hideTimeout = setTimeout(() => {
@@ -133,25 +198,62 @@ onMounted(async () => {
   const token = localStorage.getItem('token')
   if (token) {
     const decoded = parseJwt(token)
-    username.value = decoded?.name || 'Unknown User'
+    username.value = decoded?.name
   }
   try {
     const books = await fetchGet('/books')
+    const category = await fetchGet('/categories')
+    categoryManager.setCategory(category)
     bookManager.setBook(books)
-    console.log(bookManager.getBooks())
   } catch (error) {
     let message = 'failed to fetch'
-    if (error.message.includes('401')) {
+    if (error == 401) {
       message = 'Invalid credentials. Please check your username or password.'
-    } else if (error.message.includes('500')) {
+    } else if (error == 500) {
       message = 'Server error. Please try again later.'
     }
     toastStore.addToast({ message, type: 'error' })
   }
 })
 
-function handleClick(e) {
-  console.log('test')
+async function handleSelectCategory(categoryId) {
+  try {
+    const books = await fetchGet(`/books?categoryId=${categoryId}`)
+    bookManager.setBook(books)
+  } catch (error) {
+    let message = 'failed to fetch'
+    if (error == 401) {
+      message = 'Invalid credentials. Please check your username or password.'
+    } else if (error == 500) {
+      message = 'Server error. Please try again later.'
+    }
+    toastStore.addToast({ message, type: 'error' })
+  }
+}
+
+async function handleHomeClick(e) {
+  try {
+    const books = await fetchGet('/books')
+    bookManager.setBook(books)
+  } catch (error) {
+    let message = 'failed to fetch'
+    if (error == 401) {
+      message = 'Invalid credentials. Please check your username or password.'
+    } else if (error == 500) {
+      message = 'Server error. Please try again later.'
+    }
+    toastStore.addToast({ message, type: 'error' })
+  }
+  router.replace({ name: 'library' })
+}
+
+function handleLoginClick() {
+  router.replace({ name: 'login' })
+}
+
+function handleSignOutClick(e) {
+  logout()
+  router.replace({ name: 'login' })
 }
 </script>
 

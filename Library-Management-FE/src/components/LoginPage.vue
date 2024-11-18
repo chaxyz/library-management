@@ -1,75 +1,41 @@
 <script setup>
-import router from '@/router/index.js'
-import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
 import { useToastStore } from '@/stores/toastStore'
-import ToastPopup from './ToastPopup.vue'
-import { fetchApi, fetchGet, fetchDelete, fetchPut, fetchPost } from '../utils/fetchUtil.js'
+import { login } from '@/stores/userManager'
 const username = ref('')
 const password = ref('')
 const toastStore = useToastStore()
 const isButtonDisabled = computed(() => username.value.length < 8 || password.value.length < 8)
+const router = useRouter()
 
 const handleLogin = async () => {
-  try {
-    const user = await fetchPost('/login', {
+  const response = await login(
+    {
       username: username.value,
       password: password.value,
-    })
-    if (user) {
-      localStorage.setItem('token', JSON.stringify(user.access_token))
-      localStorage.setItem('refresh_token', JSON.stringify(user.refresh_token))
-      router.push({
-        path: '/library',
-        state: { toastMessage: 'Login successful!', toastType: 'success' },
-      })
-    }
-  } catch (error) {
-    let message = 'Login failed. Please try again.'
-    if (error.message.includes('401')) {
+    },
+    router,
+  )
+
+  if (response && response.access_token && response.refresh_token) {
+    localStorage.setItem('token', response.access_token)
+    localStorage.setItem('refresh_token', response.refresh_token)
+    router.push({ path: '/library' })
+  } else {
+    let message = 'Login failed, Try again later.'
+    if (response == 401) {
       message = 'Invalid credentials. Please check your username or password.'
-    } else if (error.message.includes('500')) {
+    } else if (response == 500) {
       message = 'Server error. Please try again later.'
     }
     toastStore.addToast({ message, type: 'error' })
   }
 }
-
-onMounted(async () => {
-  try {
-    const user = await fetchPost('/login', {
-      username: 'test1234',
-      password: 'test1234',
-    })
-    console.log(user)
-    fetch('http://localhost:8080/books', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => console.log(data))
-      .catch((error) => console.error('Error:', error))
-
-    const books = await fetchGet('/books')
-
-    console.log(books)
-  } catch (error) {
-    let message = 'failed to fetch'
-    if (error.message.includes('401')) {
-      message = 'Invalid credentials. Please check your username or password.'
-    } else if (error.message.includes('500')) {
-      message = 'Server error. Please try again later.'
-    }
-    toastStore.addToast({ message, type: 'error' })
-  }
-})
 </script>
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <ToastPopup />
-
     <div class="w-full max-w-md p-8 space-y-4 bg-white rounded-lg shadow-md">
       <h2 class="text-2xl font-bold text-center text-gray-800">Login</h2>
 

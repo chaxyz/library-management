@@ -1,4 +1,3 @@
-// stores/toastStore.js
 import { defineStore } from 'pinia'
 
 export const useToastStore = defineStore('toast', {
@@ -12,7 +11,7 @@ export const useToastStore = defineStore('toast', {
 
       setTimeout(() => {
         this.removeToast(id)
-      }, 5000)
+      }, 3000)
     },
     removeToast(id) {
       this.messages = this.messages.filter((toast) => toast.id !== id)

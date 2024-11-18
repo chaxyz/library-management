@@ -17,15 +17,14 @@ export const useBookManager = defineStore('bookManager', () => {
     books.push(newBook)
   }
   const findIndexById = function (id) {
-    return books.findIndex((el) => el.id === id)
+    return books.findIndex((el) => el.id == id)
   }
   const editBook = function (id, newBook) {
     const index = findIndexById(id)
     books[index] = newBook
   }
-
   const deleteBook = function (id) {
-    const index = tasks.findIndex((el) => {
+    const index = books.findIndex((el) => {
       return el.id == id
     })
     books.splice(index, 1)

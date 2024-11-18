@@ -8,7 +8,6 @@ import com.example.librarymanagement.repository.BookRepository;
 import com.example.librarymanagement.service.BookService;
 import com.example.librarymanagement.service.CategoryService;
 
-import com.example.librarymanagement.service.RentService;
 import com.example.librarymanagement.service.StorageService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -75,11 +73,12 @@ public class BookController {
 
 
     @GetMapping("")
-    public List<Book> getAllBooks() {
+    public List<Book> getAllBooks(@RequestParam(value = "categoryId", required = false) Integer categoryId) {
+        if (categoryId != null) {
+            return bookService.getAllByCatagory(categoryId);
+        }
         return bookService.getAll();
     }
-
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Book> updateBook(
