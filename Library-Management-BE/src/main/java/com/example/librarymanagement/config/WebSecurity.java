@@ -41,7 +41,6 @@ public class WebSecurity {
                 .authorizeRequests(
                         authorize -> authorize.requestMatchers("/login","signup","/token", "/error").permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers("/file/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/books/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
                                 .anyRequest().authenticated()
