@@ -83,7 +83,7 @@
     <router-view />
     <div class="p-6 flex flex-wrap gap-4 justify-start">
       <div
-        v-for="(book, index) in bookManager.getBooks()"
+        v-for="(book, index) in filteredBooks"
         :key="index"
         class="bg-white shadow-md rounded-lg flex flex-col items-center p-4 w-40 justify-between"
       >
@@ -145,19 +145,6 @@ import { useBookManager } from '@/stores/bookStore.js'
 import { useCategoryManager } from '@/stores/categoryStore.js'
 import { logout } from '@/stores/userManager.js'
 import { useRouter } from 'vue-router'
-// const books = ref([
-//   { title: 'Book One', description: 'An amazing book.', image: 'https://via.placeholder.com/150' },
-//   {
-//     title: 'Book Two',
-//     description: 'A thrilling adventure.',
-//     image: 'https://via.placeholder.com/150',
-//   },
-//   {
-//     title: 'Book Three',
-//     description: 'An insightful read.',
-//     image: 'https://via.placeholder.com/150',
-//   },
-// ])
 
 //store
 const toastStore = useToastStore()
@@ -169,6 +156,7 @@ const router = useRouter()
 const searchQuery = ref('')
 const username = ref('')
 const showDropdown = ref(false)
+const bookList = ref(bookManager.getBooks())
 //condition
 let hideTimeout
 
@@ -187,12 +175,12 @@ const clearHideTimeout = () => {
   clearTimeout(hideTimeout)
 }
 
-// const filteredBooks = computed(() => {
-//   if (!searchQuery.value.trim()) return books.value
-//   return books.value.filter((book) =>
-//     book.title.toLowerCase().includes(searchQuery.value.toLowerCase()),
-//   )
-// })
+const filteredBooks = computed(() => {
+  if (!searchQuery.value.trim()) return bookList.value
+  return bookList.value.filter((book) =>
+    book.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
+  )
+})
 
 onMounted(async () => {
   const token = localStorage.getItem('token')

@@ -32,6 +32,12 @@ const handleLogin = async () => {
     toastStore.addToast({ message, type: 'error' })
   }
 }
+
+const continueAsGuest = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('refresh_token')
+  router.push({ path: '/library' })
+}
 </script>
 
 <template>
@@ -77,6 +83,12 @@ const handleLogin = async () => {
           Log In
         </button>
       </form>
+      <button
+        @click="continueAsGuest"
+        class="w-full px-4 py-2 mt-4 font-semibold text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none"
+      >
+        Continue as Guest
+      </button>
     </div>
   </div>
 </template>
