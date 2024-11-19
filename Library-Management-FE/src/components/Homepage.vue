@@ -81,6 +81,14 @@
       </div>
     </header>
     <router-view />
+    <div class="flex justify-end p-4 bg-gray-100">
+      <button
+        class="bg-indigo-500 text-white px-4 py-2 rounded shadow hover:bg-indigo-600"
+        @click="navigateToCategory"
+      >
+        Manage Categories
+      </button>
+    </div>
     <div class="p-6 flex flex-wrap gap-4 justify-start">
       <div
         v-for="(book, index) in filteredBooks"
@@ -233,6 +241,10 @@ async function handleHomeClick(e) {
     toastStore.addToast({ message, type: 'error' })
   }
   router.replace({ name: 'library' })
+}
+
+function navigateToCategory() {
+  router.push({ name: 'categories' })
 }
 
 function handleLoginClick() {

@@ -17,7 +17,7 @@ export const useCategoryManager = defineStore('categoryManager', () => {
     categories.push(newCategory)
   }
   const findIndexById = function (id) {
-    return categories.findIndex((el) => el.id === id)
+    return categories.findIndex((el) => el.id == id)
   }
   const editCategory = function (id, newCategory) {
     const index = findIndexById(id)

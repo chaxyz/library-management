@@ -153,6 +153,7 @@ function handleSubmit(event) {
       })
       .catch((error) => {
         toastStore.addToast({ message: 'Error creating book', type: 'error' })
+        closePopup()
       })
   } else if (isEditMode.value) {
     const bookId = router.currentRoute.value.params.id
@@ -164,6 +165,7 @@ function handleSubmit(event) {
       })
       .catch((error) => {
         toastStore.addToast({ message: 'Error updating book', type: 'error' })
+        closePopup()
       })
   }
 }

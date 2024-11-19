@@ -30,16 +30,21 @@ import { useRouter } from 'vue-router'
 import { fetchGet, fetchDelete, fetchPut, fetchPost } from '../utils/fetchUtil.js'
 import { useBookManager } from '@/stores/bookStore'
 import { useToastStore } from '@/stores/toastStore.js'
-
+import { useCategoryManager } from '@/stores/categoryStore.js'
 const router = useRouter()
 const message = ref('')
 const bookManager = useBookManager()
 const toastStore = useToastStore()
-
+const catagoryManager = useCategoryManager()
+let path
 onMounted(() => {
   const route = router.currentRoute.value
   if (route.name === 'deleteBook') {
     message.value = 'Are you sure you want to delete this book?'
+    path = 'books'
+  } else if (route.name === 'deleteCategory') {
+    message.value = 'Are you sure you want to delete this catagory?'
+    path = 'categories'
   }
 })
 
@@ -47,8 +52,13 @@ async function handleConfirm() {
   const { id } = router.currentRoute.value.params
 
   try {
-    const response = await fetchDelete(`/books/${id}`)
-    bookManager.deleteBook(id)
+    const response = await fetchDelete(`/${path}/${id}`)
+    if (path == 'books') {
+      bookManager.deleteBook(id)
+    } else if (path == 'categories') {
+      catagoryManager.deleteCategory(id)
+    }
+
     toastStore.addToast({ message: 'Deleting book successfully', type: 'success' })
     closePopup()
   } catch (error) {
@@ -68,6 +78,11 @@ function handleCancel() {
 }
 
 function closePopup() {
-  router.push({ name: 'library' })
+  const route = router.currentRoute.value
+  if (route.name === 'deleteBook') {
+    router.push({ name: 'library' })
+  } else if (route.name === 'deleteCategory') {
+    router.push({ name: 'categories' })
+  }
 }
 </script>
