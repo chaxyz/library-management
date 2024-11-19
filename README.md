@@ -1,4 +1,4 @@
-# Library Management System - Setup Guide
+<h1 style="color:blue;">Library Management System - Setup Guide</h1>
 
 This repository contains the implementation of a Library Management System with the following structure:  
 
@@ -20,8 +20,42 @@ Ensure you have the following installed:
 - **Git**
 
 ---
+<h1 style="color:blue;">BACKEND-ENDPOINT</h1>
 
-## Setup Steps
+## Authentication API Endpoints
+
+| Endpoint         | Method | Description                                                                                                      | Request Example                                                                                                                                 | Response Example                                                                                                                                           |
+|-------------------|--------|------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `/signup`         | POST   | Registers a new user in the system.                                                                              | ```json { "username": "string", "password": "string", "name": "string" } ```                                                                  | ```json { "id": "string", "username": "string", "name": "string","role":"USER,ADMIN" } ```                                                                                     |
+| `/login`          | POST   | Authenticates a user and generates a JWT token for further access.                                               | ```json { "username": "string", "password": "string" } ```                                                                                     | ```json { "access_token": "string", "refresh_token": "string" } ```                                                                                           |
+| `/token`          | POST   | Refreshes the access token using a valid refresh token.                                                         | **Header:** `Authorization: Bearer <refresh_token>`                                                                                           | ```json { "access_token": "string" } ```                                                                                                                     |
+
+---
+
+## Book API Endpoints
+
+| Endpoint         | Method | Description                                                                                      | Request Example                                                                                              | Response Example                                                                                                                                                 |
+|-------------------|--------|--------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `/books`          | POST   | Creates a new book. Supports optional image upload for the book cover.                          | **Request Part:** `bookDetails` (BookDto object), **Request Param:** `file` (image file)                    | ```json { "id": 1, "name": "string", "status": "returned", "path": "string", "category": { "id": 1, "name": "string" } } ```                                     |
+| `/books/{id}`     | GET    | Retrieves a book by its ID.                                                                     | **Path Variable:** `id` (Integer)                                                                           | ```json { "id": 1, "name": "string", "status": "returned", "path": "string", "category": { "id": 1, "name": "string" } } ```                                     |
+| `/books`          | GET    | Retrieves all books. Can filter books by category ID using query parameters.                    | **Query Param (optional):** `categoryId` (Integer)                                                          | ```json [ { "id": 1, "name": "string", "status": "returned", "path": "string", "category": { "id": 1, "name": "string" } } ] ```                                  |
+| `/books/{id}`     | PUT    | Updates an existing book by its ID. Supports optional image update or removal.                  | **Path Variable:** `id` (Integer), **Request Part:** `bookDetails` (BookDto object), **Request Param:** `file` (image file) | ```json { "id": 1, "name": "updatedString", "status": "borrowed", "path": "newString", "category": { "id": 2, "name": "newCategory" } } ```                     |
+| `/books/{id}`     | DELETE | Deletes a book by its ID. Removes the associated image file if one exists.                      | **Path Variable:** `id` (Integer)                                                                           | No content returned. HTTP status: `204 No Content`                                                                                                              |
+
+---
+
+## Category API Endpoints
+
+| Endpoint         | Method | Description                                                                                       | Request Example                                                                                         | Response Example                                                                                                        |
+|-------------------|--------|---------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| `/categories`     | POST   | Creates a new category.                                                                          | ```json { "name": "string" } ```                                                                       | ```json { "id": 1, "name": "string" } ```                                                                              |
+| `/categories/{id}`| GET    | Retrieves a category by its ID.                                                                  | **Path Variable:** `id` (Integer)                                                                      | ```json { "id": 1, "name": "string" } ```                                                                              |
+| `/categories`     | GET    | Retrieves all categories.                                                                        | No additional parameters required.                                                                     | ```json [ { "id": 1, "name": "string" }, { "id": 2, "name": "anotherString" } ] ```                                    |
+| `/categories/{id}`| PUT    | Updates an existing category by its ID.                                                          | **Path Variable:** `id` (Integer), **Request Body:** ```json { "name": "updatedString" } ```            | ```json { "id": 1, "name": "updatedString" } ```                                                                       |
+| `/categories/{id}`| DELETE | Deletes a category by its ID.                                                                    | **Path Variable:** `id` (Integer)                                                                      | No content returned. HTTP status: `204 No Content`                                                                     |
+
+---
+<h1 style="color:blue;">Setup Steps</h1>
 
 ### 1. Clone the Repository
 
