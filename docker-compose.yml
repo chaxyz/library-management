@@ -9,7 +9,7 @@ services:
     container_name: library_backend
     environment:
       # Update your Spring Boot application.properties/yaml to use these
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/library?useSSL=false
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/library?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root_password
     depends_on:
