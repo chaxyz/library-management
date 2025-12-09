@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # 1. Spring Boot Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: library_backend
+    environment:
+      # Update your Spring Boot application.properties/yaml to use these
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/library?useSSL=false
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root_password
+    depends_on:
+      - db
+
+  # 2. Vue/Vite Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: library_frontend
+    # Note: We expose 80, the default Nginx port
+
+  # 3. MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: library_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: library
+    volumes:
+      - mysql_data:/var/lib/mysql
+      
+      # 1. Mount your raw SQL folders to a custom path (MySQL ignores this path)
+      - ./db/1. create:/sql_scripts/1. create
+      - ./db/2. insert:/sql_scripts/2. insert
+      
+      # 2. Mount the loader script to the special init folder
+      - ./db/load_scripts.sh:/docker-entrypoint-initdb.d/00_loader.sh
+
+  # 4. Nginx Reverse Proxy (Handles all traffic routing)
+  nginx:
+    image: nginx:alpine
+    container_name: library_reverse_proxy
+    ports:
+      - "80:80" # Map host port 80 to container port 80 (HTTP deployment)
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  mysql_data:
